@@ -3,6 +3,8 @@
 const router = require('express').Router();
 const request = require('request');
 const User = require('../model/user');
+const handlebars = require('handlebars');
+const fs = require('fs');
 let user_id;
 let playlist_id;
 let access_token;
@@ -31,6 +33,8 @@ router.post('/create/:id', (req, res) => {
   access_token = req.headers.token;
   user_id = req.params.id;
 
+
+
   request({
     url: `https://api.spotify.com/v1/users/${user_id}/playlists`,
     method: 'POST',
@@ -43,9 +47,16 @@ router.post('/create/:id', (req, res) => {
       public: false
     }
   }, (err, response, body) => {
+
+    let source = fs.readFileSync(__dirname + '/../public/webPlayer.html','utf8');
+    let template = Handlebars.compile(source);
+    let data = {"playlist_id":body.id}
+    let result = template(data);
+
     playlist_id = body.id;
     if (!body.error && res.statusCode === 200) {
-      return res.json({Message: 'Playlist Created!'});
+      // return res.json({Message: 'Playlist Created!'});
+      return res.redirect('/webHelper');
     }
     else {
       res.json('error', body.error);
