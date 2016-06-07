@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stefuhnee/EQ.git"
+    "url": "git+https://github.com/EQ-project/EQ.git"
   },
   "keywords": [
     "playlist",
@@ -39,9 +39,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/stefuhnee/EQ/issues"
+    "url": "https://github.com/EQ-project/EQ/issues"
   },
-  "homepage": "https://github.com/stefuhnee/EQ#readme",
+  "homepage": "https://github.com/EQ-project/EQ#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-http": "^2.0.1",
@@ -59,9 +59,6 @@
     "jsonwebtoken": "^7.0.0",
     "method-override": "^2.3.6",
     "mongoose": "^4.4.19",
-    "morgan": "^1.7.0",
-    "passport": "^0.3.2",
-    "passport-spotify": "^0.3.0",
     "querystring": "^0.2.0",
     "request": "^2.72.0",
     "superagent": "^2.0.0"
