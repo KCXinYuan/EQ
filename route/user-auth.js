@@ -70,12 +70,9 @@ router.get('/callback', function(req, res) {
 
     request.post(authOptions, function(error, response, body) {
       if (!error && response.statusCode === 200) {
-
         access_token = body.access_token;
         let expires_in = body.expires_in * 1000;
         let refresh_token = body.refresh_token;
-        manager_id = body.id;
-        console.log(access_token);
 
         let options = {
           url: 'https://api.spotify.com/v1/me',
@@ -85,18 +82,22 @@ router.get('/callback', function(req, res) {
 
         // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
-          console.log(body);
+
+          manager_id = body.id;
+
           let newManager = new Manager({username: manager_id, tokenExpires: expires_in + Date.now(), accessToken: access_token, refreshToken: refresh_token});
           let newSession = new Session({manager_id: manager_id});
 
           Manager.findOneAndUpdate({username: manager_id}, { $set: {accessToken: access_token, refreshToken: refresh_token}}, (err, manager) => {
             if (!manager) {
               newManager.save((err) => {
+                console.log('error', err);
                 if (err) console.log('manager save error');
               });
             }
           });
           Session.findOne({manager_id: manager_id}, (err, session) => {
+            console.log('session err', err);
             if (!session) {
               newSession.save((err) => {
                 if (err) console.log('session save error');

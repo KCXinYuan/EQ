@@ -5,6 +5,7 @@ const request = require('request');
 const Session = require('../model/session');
 const findUser = require('../lib/find-user');
 const checkToken = require('../lib/check-token');
+const jwtAuth = require('../lib/jwt-auth');
 const requestAgent = require('superagent');
 let access_token;
 let playlist_id;
@@ -12,8 +13,9 @@ let manager_id;
 
 router.use('*', findUser);
 router.use('*', checkToken);
+router.use('*', jwtAuth);
 
-router.get('/playlist', (req, res) => {
+router.get('/playlist', (req, res, next) => {
 
   playlist_id = res.session.playlist_id;
   manager_id = res.manager.username;
@@ -24,13 +26,13 @@ router.get('/playlist', (req, res) => {
   .set('Authorization', `Bearer ${access_token}`)
   .end((err, res) => {
     console.log(res.body.tracks.items[0]);
-    if (err) return err;
+    if (err) return next(err);
     pTracks = res.body.tracks.items;
   });
   res.json({tracks: pTracks});
 });
 
-router.post('/create/:name', (req, res) => {
+router.post('/create/:name', (req, res, next) => {
 
   access_token = res.manager.accessToken;
   manager_id = res.manager.username;
@@ -51,17 +53,17 @@ router.post('/create/:name', (req, res) => {
     let playlist_id = body.id;
     if (!body.error && res.statusCode === 200) {
       Session.findOneAndUpdate({manager_id}, { $set: {playlist_id}}, (err) => {
-        if (err) console.log('error updating user with playlist');
+        if (err) next(err);
       });
       return res.json({Message: 'Playlist Created!'});
     }
     else {
-      res.json('error', body.error);
+      next(body.error);
     }
   });
 });
 
-router.post('/add/:track', (req, res) => {
+router.post('/add/:track', (req, res, next) => {
 
   access_token = res.manager.accessToken;
   let track = req.params.track;
@@ -82,12 +84,12 @@ router.post('/add/:track', (req, res) => {
       return res.json({Message: 'Track added!'});
     }
     else {
-      res.json('error', body.error);
+      next(body.error);
     }
   });
 });
 
-router.delete('/delete/:track', (req, res) => {
+router.delete('/delete/:track', (req, res, next) => {
   let manager = res.manager;
   let track = req.params.track;
   let manager_id = manager.username;
