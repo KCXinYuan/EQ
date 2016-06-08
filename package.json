@@ -1,7 +1,7 @@
 {
   "name": "eq",
   "version": "0.0.1",
-  "description": "TBD",
+  "description": "Create collaborative playlists for a party or a road trip using Spotify!",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -17,7 +17,8 @@
   },
   "keywords": [
     "playlist",
-    "music"
+    "music",
+    "spotify"
   ],
   "contributors": [
     {
@@ -26,15 +27,15 @@
     },
     {
       "name": "Drew Ferris",
-      "email": "blah"
+      "email": "ddf8029@gmail.com"
     },
     {
       "name": "Madeline Mow",
-      "email": "blah"
+      "email": "mmow313@gmail.com"
     },
     {
       "name": "Kevin Chuang",
-      "email": "blah"
+      "email": "kcxinkun@gmail.com"
     }
   ],
   "license": "MIT",
@@ -43,24 +44,23 @@
   },
   "homepage": "https://github.com/EQ-project/EQ#readme",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-http": "^2.0.1",
-    "gulp": "^3.9.1",
-    "gulp-eslint": "^2.0.0",
-    "gulp-mocha": "^2.2.0",
-    "mocha": "^2.5.3"
+    "chai": "3.5.0",
+    "chai-http": "2.0.1",
+    "eslint": "^2.11.1",
+    "gulp": "3.9.1",
+    "gulp-eslint": "2.0.0",
+    "gulp-mocha": "2.2.0",
+    "mocha": "2.5.3"
   },
   "dependencies": {
-    "bcrypt": "^0.8.6",
-    "body-parser": "^1.15.1",
-    "cookie-parser": "^1.4.3",
-    "express": "^4.13.4",
-    "express-session": "^1.13.0",
-    "jsonwebtoken": "^7.0.0",
-    "method-override": "^2.3.6",
-    "mongoose": "^4.4.19",
-    "querystring": "^0.2.0",
-    "request": "^2.72.0",
-    "superagent": "^2.0.0"
+    "bcrypt": "0.8.6",
+    "body-parser": "1.15.1",
+    "cookie-parser": "1.4.3",
+    "express": "4.13.4",
+    "jsonwebtoken": "7.0.0",
+    "mongoose": "4.4.19",
+    "querystring": "0.2.0",
+    "request": "2.72.0",
+    "superagent": "2.0.0"
   }
 }

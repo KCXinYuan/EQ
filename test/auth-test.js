@@ -9,6 +9,7 @@ const mongoose = require('mongoose');
 const basicAuth = require('../lib/basic-auth');
 const jwtAuth = require('../lib/jwt-auth');
 const dbPort = process.env.MONGOLAB_URI;
+const Session = require('../model/session');
 
 process.env.MONGOLAB_URI = 'mongodb://localhost/test_db';
 require('../server');
@@ -32,8 +33,12 @@ describe('unit tests', () => {
     .post('/signup')
     .send({username:'test', password:'test'})
     .end((err, res) => {
+      if (err) throw err;
       token = res.body.token;
-      done();
+      let testSession = new Session({manager_id: '1216797299'});
+      testSession.save(() => {
+        done();
+      });
     });
   });
 
@@ -81,7 +86,6 @@ describe('unit tests', () => {
 
   });
 
-
   describe('auth route tests', () => {
 
     after((done)=> {
@@ -96,8 +100,8 @@ describe('unit tests', () => {
       .post('/signup')
       .send({username:'test2', password:'test2'})
       .end((err, res) => {
+        if (err) throw err;
         token = res.body.token;
-        expect(err).to.eql(null);
         expect(res).to.have.status(200);
         expect(typeof token).to.eql('string');
         done();
@@ -106,10 +110,10 @@ describe('unit tests', () => {
 
     it('should sign in a user with a token', (done) => {
       request('localhost:8888')
-      .get('/signin')
+      .get('/signin/1216797299')
       .auth('test2', 'test2')
       .end((err, res) => {
-        expect(err).to.eql(null);
+        if (err) throw err;
         expect(res).to.have.status(200);
         expect(res.body.token).to.eql(token);
         done();

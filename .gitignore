@@ -1,6 +1,7 @@
 
 # application specific
 db/
+.env
 
 # Created by https://www.gitignore.io/api/node,osx,vim
 

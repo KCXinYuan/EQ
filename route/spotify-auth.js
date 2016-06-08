@@ -2,13 +2,13 @@
 
 const express = require('express');
 const router = express.Router();
-const request = require('request'); // "Request" library
+const request = require('request');
 const querystring = require('querystring');
 const cookieParser = require('cookie-parser');
 
 const client_id = process.env.CLIENT_ID; // Your client id
 const client_secret = process.env.CLIENT_SECRET; // Your secret
-const redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+
 const stateKey = 'spotify_auth_state';
 
 const generateRandomString = require('../lib/generate-random-string');
@@ -18,6 +18,7 @@ const Session = require('../model/session');
 
 let access_token;
 let manager_id;
+let redirect_uri;
 
 router.use(express.static(__dirname + '/../public'))
    .use(cookieParser());
@@ -27,7 +28,7 @@ router.get('/login', (req, res) => {
   let state = generateRandomString(16);
   res.cookie(stateKey, state);
   let scope = 'user-read-private playlist-modify-private';
-
+  redirect_uri = `${req.headers.host === 'localhost:8888'?'http://localhost:8888/callback':'https://eq-project.herokuapp.com/callback'}`;
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -101,8 +102,8 @@ router.get('/callback', function(req, res) {
                 return res.send('Please have users include the field username in the headers of every request');
               });
             }
-            res.send('Please have users include the field username in the headers of every request');
           });
+          res.send('Please have users include the field username in the headers of every request');
         });
       }
     });
