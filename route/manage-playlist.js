@@ -80,8 +80,6 @@ router.post('/create/:name', findModels, checkToken, (req, res, next) => {
     if (err) return next(err);
     else {
       Session.findOneAndUpdate({manager_id}, {$set: {playlist_id}}, (err) => {
-        console.log('playlist_id', playlist_id);
-        console.log('adding to session');
         if (err) return next(err);
         res.json({Message: 'Playlist Created!'});
       });
@@ -94,7 +92,7 @@ router.post('/add/:track', findModels, checkToken, jwtAuth, (req, res, next) => 
   access_token = res.manager.accessToken;
   let track = req.params.track;
 
-  if (res.user === undefined && (res.manager.tracks.indexOf(track) !== -1) ) {
+  if (!res.user && (res.manager.tracks.indexOf(track) !== -1) ) {
     return res.json({Message: 'Song already on playlist.'});
 
   } else if (res.user && res.user.tracks.indexOf(track) !== -1) {
@@ -110,13 +108,11 @@ router.post('/add/:track', findModels, checkToken, jwtAuth, (req, res, next) => 
       .end((err) => {
         if (err) {
           return next(err);
-        }
-        console.log('res user', res.user);
-        if (res.user === undefined) {
+        } else if (!res.user) {
           Manager.findOne({username: res.manager.username}, (err, manager) => {
             if (err) return next(err);
 
-            let managerTrackArray = manager.tracks; //prevent manager from adding same track
+            let managerTrackArray = manager.tracks;
             managerTrackArray.push(track);
             Manager.findOneAndUpdate({username: manager.username}, {$set: {tracks: managerTrackArray}}, (err) => {
               if (err) return next(new Error('Cannot update user tracks'));
@@ -126,7 +122,7 @@ router.post('/add/:track', findModels, checkToken, jwtAuth, (req, res, next) => 
         } else {
 
           User.findOne({username: res.user.username}, (err, user) => {
-            let userTrackArray = user.tracks; //prevent user from adding same track
+            let userTrackArray = user.tracks;
             userTrackArray.push(track);
             User.findOneAndUpdate({username: user.username}, {$set: {tracks: userTrackArray}}, (err) => {
               if (err) return next(new Error('Cannot update user tracks'));
@@ -146,16 +142,13 @@ router.delete('/delete/:track', findModels, checkToken, jwtAuth, refreshVetoes, 
   playlist_id = res.session.playlist_id;
   access_token = manager.accessToken;
 
-  if (res.user === undefined) {
+  if (!res.user) {
     Manager.findOne({username: res.manager.username}, (err, manager) => {
       if (err) return next(new Error('Cannot find manager.'));
 
-      if (manager.vetoes === res.session.users.length + 1) {
-        return res.json({Message: 'Out of vetoes'});
-      }
+      else if (manager.vetoes === res.session.users.length + 1) return res.json({Message: 'Out of vetoes'});
       else {
         let newManagerVetoCount = manager.vetoes + 1;
-        console.log('newManagerVetoCount', newManagerVetoCount);
         Manager.findOneAndUpdate({username: manager.username}, {$set: {vetoes: newManagerVetoCount}}, (err) => {
           if (err) return next(new Error('Cannot update user vetoes'));
           return;
