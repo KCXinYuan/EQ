@@ -93,18 +93,14 @@ router.get('/callback', (req, res, next) => {
             else if (!manager) {
               newManager.save((err) => {
                 if (err) return next(err);
-
-                Session.findOne({manager_id: manager_id}, (err, session) => {
-                  if (!session) {
-                    newSession.save((err) => {
-                      if (err) return next(err);
-                      return res.send('Please have users include the field username in the headers of every request');
-                    });
-                  } else return next(err);
+                newSession.save((err) => {
+                  if (err) return next(err);
+                  return res.json({Message: 'Successfully authorized'});
                 });
               });
+            } else {
+              res.json({Message: 'You are already authorized, but thanks for trying!'});
             }
-            res.send('Please have users include the field username in the headers of every request');
           });
         });
       }

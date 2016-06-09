@@ -84,7 +84,7 @@ describe('playlist routes', () => {
       .end((err,res) => {
         if (err) throw err;
         console.log(res.body);
-        expect(res.body).to.eql('Track added!');
+        expect(res.body.Message).to.eql('Track added!');
         done();
       });
     });
