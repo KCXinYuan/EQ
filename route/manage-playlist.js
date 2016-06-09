@@ -64,7 +64,6 @@ router.post('/create/:name', findModels, checkToken, (req, res, next) => {
   access_token = res.manager.accessToken;
   manager_id = res.manager.username;
   let playlistName = req.params.name;
-  let playlist_id = res.session.playlist_id;
 
   if (res.user) return next(new Error('User not allowed to make new playlist'));
 
@@ -73,11 +72,14 @@ router.post('/create/:name', findModels, checkToken, (req, res, next) => {
   .send({name:playlistName, public:false})
   .set('Authorization', `Bearer ${access_token}`)
   .set('Accept', 'application/json')
-  .end((err) => {
+  .end((err, response) => {
+    playlist_id = response.body.id;
 
     if (err) return next(err);
     else {
       Session.findOneAndUpdate({manager_id}, {$set: {playlist_id}}, (err) => {
+        console.log('playlist_id', playlist_id);
+        console.log('adding to session');
         if (err) return next(err);
         res.json({Message: 'Playlist Created!'});
       });
@@ -89,6 +91,7 @@ router.post('/add/:track', findModels, checkToken, jwtAuth, (req, res, next) => 
 
   access_token = res.manager.accessToken;
   let track = req.params.track;
+  console.log('res session', res.session);
 
   request
     .post(`https://api.spotify.com/v1/users/${res.session.manager_id}/playlists/${res.session.playlist_id}/tracks`)
@@ -96,8 +99,11 @@ router.post('/add/:track', findModels, checkToken, jwtAuth, (req, res, next) => 
     .set('Authorization', `Bearer ${access_token}`)
     .set('Accept', 'application/json')
     .end((err) => {
-      if(err) return next(err);
-
+      if(err) {
+        // console.log('error in request', err);
+        return next(err);
+      }
+      console.log('res user', res.user);
       if(res.user === undefined) {
         Manager.findOne({username: res.manager.username}, (err, manager) => {
           if (err) return res.send('Cannot find manager.');
@@ -128,7 +134,7 @@ router.delete('/delete/:track', findModels, checkToken, jwtAuth, (req, res, next
   let manager = res.manager;
   let track = req.params.track;
   let manager_id = manager.username;
-  let playlist_id = res.session.playlist_id;
+  playlist_id = res.session.playlist_id;
   access_token = manager.accessToken;
 
   if(res.user === undefined) {

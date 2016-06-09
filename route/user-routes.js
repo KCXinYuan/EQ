@@ -17,7 +17,19 @@ router.post('/signup', bodyParser, (req, res, next) => {
     if (err || user) return next(new Error('Could not create user'));
     newUser.user_token = newUser.generateToken();
 
-    newUser.save((err) => {
+    newUser.save((err, user) => {
+      if (req.headers.manager) {
+        Session.findOne({manager_id: req.headers.manager}, (err, session) => {
+          if (err || !session) return next(new Error('Cannot find session'));
+          else if (session.users.indexOf(user.username) === -1) {
+            let sessionArray = session.users;
+            sessionArray.push(user.username);
+            Session.findOneAndUpdate({manager_id: req.headers.manager}, {$set: {users: sessionArray}}, (err) => {
+              if (err) return next(new Error('Cannot update session'));
+            });
+          }
+        });
+      }
       if (err) return next(new Error('Could not create user'));
       res.json({token: newUser.user_token});
     });
