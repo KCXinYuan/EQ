@@ -59,30 +59,30 @@ router.get('/playlist', findModels, checkToken, jwtAuth, (req, res) => {
   });
 });
 
-router.post('/create/:name', findModels, checkToken, jwtAuth, (req, res, next) => {
+router.post('/create/:name', findModels, checkToken, (req, res, next) => {
 
   access_token = res.manager.accessToken;
   manager_id = res.manager.username;
   let playlistName = req.params.name;
+  let playlist_id = res.session.playlist_id;
+
+  if (res.user) return next(new Error('User not allowed to make new playlist'));
 
   request
   .post(`https://api.spotify.com/v1/users/${manager_id}/playlists`)
   .send({name:playlistName, public:false})
   .set('Authorization', `Bearer ${access_token}`)
   .set('Accept', 'application/json')
-  .end((err,res) => {
+  .end((err) => {
 
-    if(err) next(err);
-    let playlist_id = res.body.id;
-
-    if(!err) {
+    if (err) return next(err);
+    else {
       Session.findOneAndUpdate({manager_id}, {$set: {playlist_id}}, (err) => {
-        if (err) next(err);
+        if (err) return next(err);
+        res.json({Message: 'Playlist Created!'});
       });
     }
-
   });
-  res.json({Message:'Playlist Created!'});
 });
 
 router.post('/add/:track', findModels, checkToken, jwtAuth, (req, res, next) => {
@@ -133,7 +133,7 @@ router.delete('/delete/:track', findModels, checkToken, jwtAuth, (req, res, next
 
   if(res.user === undefined) {
     Manager.findOne({username: res.manager.username}, (err, manager) => {
-      if (err) return res.send('Cannot find manager.');
+      if (err) return next(new Error('Cannot find manager.'));
 
       if(manager.vetoes === res.session.users.length + 1) {
         res.send('Out of vetoes');
@@ -159,7 +159,7 @@ router.delete('/delete/:track', findModels, checkToken, jwtAuth, (req, res, next
             'Accept', 'application/json'
           )
           .end((err) => {
-            if(err) next(err);
+            if(err) return next(err);
             res.json({Message:'Track deleted!'});
           });
       }
@@ -167,13 +167,17 @@ router.delete('/delete/:track', findModels, checkToken, jwtAuth, (req, res, next
   } else {
 
     User.findOne({username: res.user.username}, (err, user) => {
+
       if(user.vetoes === res.session.users.length + 1) {
         res.send('Out of vetoes');
+
       } else {
         let newUserVetoCount = user.vetoes + 1; //prevent user from adding same track
+
         User.findOneAndUpdate({username: user.username}, {$set: {vetoes: newUserVetoCount}}, (err) => {
           if (err) return next(new Error('Cannot update user tracks'));
         });
+
         request
           .del(`https://api.spotify.com/v1/users/${manager_id}/playlists/${playlist_id}/tracks`)
           .send({
@@ -190,7 +194,7 @@ router.delete('/delete/:track', findModels, checkToken, jwtAuth, (req, res, next
             'Accept', 'application/json'
           )
           .end((err) => {
-            if(err) next(err);
+            if(err) return next(err);
             res.json({Message:'Track deleted!'});
           });
       }
@@ -199,7 +203,7 @@ router.delete('/delete/:track', findModels, checkToken, jwtAuth, (req, res, next
 });
 
 router.use((err, req, res, next) => {
-  res.json(err);
+  res.json(err.message);
   next(err);
 });
 

@@ -29,6 +29,7 @@ router.get('/login', (req, res) => {
   res.cookie(stateKey, state);
   let scope = 'user-read-private playlist-modify-private';
   redirect_uri = `${req.headers.host === 'localhost:8888'?'http://localhost:8888/callback':'https://eq-project.herokuapp.com/callback'}`;
+
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -39,7 +40,7 @@ router.get('/login', (req, res) => {
     }));
 });
 
-router.get('/callback', function(req, res) {
+router.get('/callback', (req, res, next) => {
 
   let code = req.query.code || null;
   let state = req.query.state || null;
@@ -66,7 +67,7 @@ router.get('/callback', function(req, res) {
       json: true
     };
 
-    request.post(authOptions, function(error, response, body) {
+    request.post(authOptions, (error, response, body) => {
 
       if (!error && response.statusCode === 200) {
         access_token = body.access_token;
@@ -87,27 +88,33 @@ router.get('/callback', function(req, res) {
 
           Manager.findOneAndUpdate({username: manager_id}, { $set: {accessToken: access_token, refreshToken: refresh_token}}, (err, manager) => {
 
-            if (!manager) {
+            if (err) return next(err);
+
+            else if (!manager) {
               newManager.save((err) => {
-                if (err) console.log('manager save error');
+                if (err) return next(err);
+
+                Session.findOne({manager_id: manager_id}, (err, session) => {
+                  if (!session) {
+                    newSession.save((err) => {
+                      if (err) return next(err);
+                      return res.send('Please have users include the field username in the headers of every request');
+                    });
+                  } else return next(err);
+                });
               });
             }
+            res.send('Please have users include the field username in the headers of every request');
           });
-
-          Session.findOne({manager_id: manager_id}, (err, session) => {
-
-            if (!session) {
-              newSession.save((err) => {
-                if (err) console.log('session save error');
-                return res.send('Please have users include the field username in the headers of every request');
-              });
-            }
-          });
-          res.send('Please have users include the field username in the headers of every request');
         });
       }
     });
   }
+});
+
+router.use((err, req, res, next) => {
+  res.json(err.message);
+  next(err);
 });
 
 module.exports = router;

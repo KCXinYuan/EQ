@@ -43,7 +43,8 @@ describe('unit tests', () => {
       if (err) throw err;
       res.manager = data;
 
-      testSession.save((err) => {
+      testSession.save((err, session) => {
+        console.log('session', session)
         if (err) throw err;
         done();
       });
@@ -68,7 +69,7 @@ describe('unit tests', () => {
     });
 
     it('should request a new token and store it on the manager if the current token is invalid', (done) => {
-      Manager.findOneAndUpdate({username: '1216797299'}, {$set: {tokenExpires: Date.now() - 1000}}, {new: true}, (err, manager) => {
+      Manager.findOneAndUpdate({username: '1216797299'}, {$set: {tokenExpires: Date.now() - 10000}}, {new: true}, (err, manager) => {
         if (err) throw err;
         res.manager = manager;
         console.log('res.manager inside test', res.manager);
