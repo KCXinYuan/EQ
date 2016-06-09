@@ -83,7 +83,6 @@ describe('playlist routes', () => {
       .set('username', manager.username)
       .end((err,res) => {
         if (err) throw err;
-        console.log(res.body);
         expect(res.body.Message).to.eql('Track added!');
         done();
       });
