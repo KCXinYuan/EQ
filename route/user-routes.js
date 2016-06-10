@@ -9,23 +9,25 @@ const router = module.exports = express.Router();
 
 router.post('/signup', bodyParser, (req, res, next) => {
 
+  if (!req.body.password || !req.body.username) return next(new Error('Please enter a username and password'));
+
   let newUser = new User(req.body);
-  let managerID = req.headers.manager;
+  let managerId = req.headers.manager;
   newUser.password = newUser.hashPassword();
   req.body.password = null;
 
   User.findOne({username: req.body.username}, (err, user) => {
     if (err || user) return next(new Error('Could not create user'));
-    newUser.user_token = newUser.generateToken();
+    newUser.userToken = newUser.generateToken();
 
     newUser.save((err, user) => {
-      if (req.headers.manager) {
+      if (managerId) {
         if (err) return next(new Error('Could not create user'));
-        else if (req.headers.manager) findAndUpdateSession(managerID, user, next);
-        res.json({token: newUser.user_token});
+        findAndUpdateSession(managerId, user, next);
+        res.json({token: newUser.userToken});
       } else {
         if (err) return next(new Error('Could not create user'));
-        res.json({token: newUser.user_token});
+        res.json({token: newUser.userToken});
       }
     });
   });
@@ -34,26 +36,27 @@ router.post('/signup', bodyParser, (req, res, next) => {
 
 router.get('/signin', basicAuth, (req, res, next) => {
 
-  let managerID = req.headers.manager;
+  let managerId = req.headers.manager;
   let username = req.auth.username;
+  let password = req.auth.password;
 
   User.findOne({username}, (err, user) => {
-    if (err || !user) return next(new Error('Cannot find user'));
-    else if (!user.comparePassword(req.auth.password)) return next(new Error('Invalid password'));
-    else if(!managerID) return res.json({Message: 'Add manager name to headers'});
-    findAndUpdateSession(managerID, user, next);
+    if (err || !user || !user.comparePassword(password)) return next(new Error('Validation failure'));
+    else if (managerId) findAndUpdateSession(managerId, user, next);
     return res.json({token: user.generateToken()});
   });
 });
 
-function findAndUpdateSession(managerID, user, next) {
-  Session.findOne({manager_id: managerID}, (err, session) => {
-    if (err || !session) return next(new Error('Cannot find session'));
-    else if (session.users.indexOf(user.username) === -1) {
-      let sessionArray = session.users;
-      sessionArray.push(user.username);
-      Session.findOneAndUpdate({manager_id: managerID}, {$set: {users: sessionArray}}, (err) => {
-        if (err) return next(new Error('Cannot update session'));
+function findAndUpdateSession(managerId, user, next) {
+
+  Session.findOne({managerId}, (err, session) => {
+    let users = session.users;
+
+    if (err || !session) return next(err);
+    else if (users.indexOf(user.username) === -1) {
+      users.push(user.username);
+      Session.findOneAndUpdate({managerId}, {$set: {users}}, (err) => {
+        if (err) return next(err);
       });
     }
   });

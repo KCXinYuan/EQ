@@ -4,13 +4,15 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 const expect = chai.expect;
-const request = require('chai').request;
+const request = chai.request;
 const mongoose = require('mongoose');
+
 const basicAuth = require('../lib/basic-auth');
 const jwtAuth = require('../lib/jwt-auth');
-const dbPort = process.env.MONGOLAB_URI;
+
 const Session = require('../model/session');
 
+const dbPort = process.env.MONGOLAB_URI;
 process.env.MONGOLAB_URI = 'mongodb://localhost/test_db';
 require('../server');
 
@@ -29,7 +31,7 @@ describe('auth unit tests', () => {
   let token;
 
   before((done) => {
-    let testSession = new Session({manager_id: '1216797299'});
+    let testSession = new Session({managerId: '1216797299'});
     testSession.save(() => {
       request('localhost:8888')
       .post('/signup')
@@ -48,9 +50,7 @@ describe('auth unit tests', () => {
     baseString = new Buffer('user:pass').toString('base64');
     authString = 'Basic ' + baseString;
     req = {
-      headers: {
-        authorization: authString
-      }
+      headers: {authorization: authString}
     };
 
     basicAuth(req, {}, () => {
@@ -61,9 +61,7 @@ describe('auth unit tests', () => {
   it('should find a user given a token for JWT authorization', (done) => {
 
     req = {
-      headers: {
-        token: token
-      }
+      headers: {token}
     };
 
     jwtAuth(req, null, () => {
@@ -75,13 +73,11 @@ describe('auth unit tests', () => {
 
   it('should error on invalid token', (done) => {
     req = {
-      headers: {
-        token: 'invalid'
-      }
+      headers: {token: 'invalid'}
     };
 
     jwtAuth(req, null, (err) => {
-      expect(err.message).to.eql('Invalid token');
+      expect(err).to.not.eql(null);
       done();
     });
   });

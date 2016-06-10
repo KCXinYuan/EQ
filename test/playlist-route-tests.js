@@ -1,14 +1,16 @@
 'use strict';
+
 const chai = require('chai');
 const chaiHTTP = require('chai-http');
 chai.use(chaiHTTP);
-const mongoose = require('mongoose');
 const expect = chai.expect;
 const request = chai.request;
+const mongoose = require('mongoose');
+
 const Manager = require('../model/manager');
 const Session = require('../model/session');
 
-const access_token = process.env.ACCESS_TOKEN;
+const accessToken = process.env.ACCESS_TOKEN;
 const dbPort = process.env.MONGOLAB_URI;
 process.env.MONGOLAB_URI = 'mongodb://localhost/test';
 
@@ -20,13 +22,16 @@ describe('playlist routes', () => {
   let manager;
 
   before((done) => {
-    let testManager = new Manager({username: '1216797299', accessToken: access_token, refreshToken: 'test', tokenExpires: Date.now() + 100000});
-    let testSession = new Session({manager_id: '1216797299'});
+    let testManager = new Manager({username: '1216797299', accessToken, refreshToken: 'test', tokenExpires: Date.now() + 100000});
+    let testSession = new Session({managerId: '1216797299'});
+
     testManager.save((err, data) => {
       if (err) throw err;
       manager = data;
+
       testSession.save((err) => {
         if (err) throw err;
+
         request('localhost:8888')
         .post('/signup')
         .set('manager', '1216797299')
@@ -42,11 +47,13 @@ describe('playlist routes', () => {
 
 
   before((done) => {
-    let testManager = new Manager({username: '1216797299', accessToken: access_token, refreshToken: 'test', tokenExpires: Date.now() + 100000});
-    let testSession = new Session({manager_id: '1216797299'});
+    let testManager = new Manager({username: '1216797299', accessToken: accessToken, refreshToken: 'test', tokenExpires: Date.now() + 100000});
+    let testSession = new Session({managerId: '1216797299'});
+
     testManager.save((err, data) => {
       if (err) throw err;
       manager = data;
+      
       testSession.save((err) => {
         if (err) throw err;
         done();

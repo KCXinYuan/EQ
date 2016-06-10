@@ -2,9 +2,13 @@
   "name": "eq",
   "version": "0.0.1",
   "description": "Create collaborative playlists for a party or a road trip using Spotify!",
-  "main": "index.js",
+  "main": "server.js",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "lib": "lib",
+    "model": "model",
+    "public": "public",
+    "route": "route"
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",

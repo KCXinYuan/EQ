@@ -1,5 +1,5 @@
 # __EQ:__ _Spotify Playlist Equalizer_
-A server-side application enabling collaborative Spotify playlist creation and modification.  The app allows multiple connected users to add, veto/delete, and view a single playlist via simple REST requests.  A premium Spotify account is required for the user initially creating and playing songs from the playlist, hereafter referred to as "the manager".
+A server-side application enabling collaborative Spotify playlist creation and modification.  The app allows multiple connected users to add tracks, veto/delete tracks, and view a single playlist via simple REST requests.  A premium Spotify account is required for the user initially creating and playing songs from the playlist, hereafter referred to as "the manager".
 
 ---
 

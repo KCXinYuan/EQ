@@ -6,3 +6,4 @@
 /Procfile
 /npm-debug.log
 /*.bak
+/env.sh

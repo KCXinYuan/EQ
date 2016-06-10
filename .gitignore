@@ -2,6 +2,7 @@
 # application specific
 db/
 .env
+env.sh
 
 # Created by https://www.gitignore.io/api/node,osx,vim
 

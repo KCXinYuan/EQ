@@ -3,12 +3,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+
 const secret = process.env.SECRET || 'testPass';
 
 const User = new mongoose.Schema({
   username: {type: String, required: true},
   password: {type: String, required: true},
-  user_token: {type: String, default: null},
+  userToken: {type: String, default: null},
   vetoes: {type: Number, required: true, default: 0},
   tracks: {type: Array},
   signInTime: {type: Number, default: Date.now()}

@@ -3,8 +3,8 @@
 const mongoose = require('mongoose');
 
 const Session = new mongoose.Schema({
-  manager_id: {type: String, required: true},
-  playlist_id: {type: String},
+  managerId: {type: String, required: true},
+  playlistId: {type: String},
   users: {type: Array}
 });
 

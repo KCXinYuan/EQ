@@ -4,7 +4,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 const expect = chai.expect;
-const request = require('chai').request;
+const request = chai.request;
 const mongoose = require('mongoose');
 
 const Session = require('../model/session');
@@ -18,14 +18,13 @@ const refresh = require('../lib/refresh-vetoes');
 
 process.env.MONGOLAB_URI = 'mongodb://localhost/test_db';
 const dbPort = process.env.MONGOLAB_URI;
-const access_token = process.env.ACCESS_TOKEN;
-const refresh_token = process.env.REFRESH_TOKEN;
+const accessToken = process.env.ACCESS_TOKEN;
+const refreshToken = process.env.REFRESH_TOKEN;
 
 require('../server');
 
-
 let req = {};
-req.token = access_token;
+req.token = accessToken;
 req.headers = {};
 req.headers.username = 'test';
 let res = {};
@@ -35,8 +34,8 @@ describe('middleware unit tests', () => {
 
   before((done) => {
 
-    let testManager = new Manager({username: '1216797299', accessToken: access_token, refreshToken: refresh_token, tokenExpires: Date.now() + 100000});
-    let testSession = new Session({manager_id: '1216797299', users:['test']});
+    let testManager = new Manager({username: '1216797299', accessToken, refreshToken, tokenExpires: Date.now() + 100000});
+    let testSession = new Session({managerId: '1216797299', users:['test']});
     let testUser = new User({username:'test2', password:'test2', vetoes:1, signInTime:(Date.now() + 3600001)});
 
     testManager.save((err, data) => {
@@ -74,7 +73,7 @@ describe('middleware unit tests', () => {
     it('should not change the token stored on the manager if it is valid', (done) => {
 
       checkToken(req, res, () => {
-        expect(res.manager.accessToken).to.eql(access_token);
+        expect(res.manager.accessToken).to.eql(accessToken);
         done();
       });
     });
@@ -83,9 +82,8 @@ describe('middleware unit tests', () => {
       Manager.findOneAndUpdate({username: '1216797299'}, {$set: {tokenExpires: 0}}, {new: true}, (err, manager) => {
         if (err) throw err;
         res.manager = manager;
-        console.log('manager', manager);
         checkToken(req, res, () => {
-          expect(res.manager.accessToken).to.not.eql(access_token);
+          expect(res.manager.accessToken).to.not.eql(accessToken);
           done();
         });
       });

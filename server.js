@@ -4,13 +4,13 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser').json();
-const spotifyAuthRouter = require('./route/spotify-auth');
-const playlistRouter = require('./route/manage-playlist');
+const spotifyAuthRouter = require('./route/spotify-auth-routes');
+const playlistRouter = require('./route/manage-playlist-routes');
 const userAuth = require('./route/user-routes');
 
 const dbPort = process.env.MONGODB_URI || 'mongodb://localhost/dev_db';
-mongoose.connect(dbPort);
 
+mongoose.connect(dbPort);
 
 app.use(express.static(__dirname + '/public'));
 
